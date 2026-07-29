@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+
+enum TipoUsuario {
+    CLIENTE
+    VENDEDOR
+}
+
+model Usuario {
+    id String @id @default(uuid())
+    Nome String
+    Email String @unique
+    Senha String
+    Telefone String?
+    Cpf String? @unique
+    Endereco String?
+
+    Cnpj String? @unique
+    ContaBancaria String?
+    Tipo TipoUsuario @default(CLIENTE)
+
+
+    ProdutosAVenda Produto[] @relation("VendedorProdutos")
+    Favoritos Favorito[]
+    Carrinho ItemCarrinho[]
+    Compras Pedido[] @relation("ClientePedidos")    
+}
+
+model Produto {
+    id String @id @default(uuid())
+    Nome String
+    Descricao String
+    Preco Float
+    Foto String
+    Categoria String
+
+    VendedorId String
+    Vendedor Usuario @relation("VendedorProdutos", fields: [VendedorId], references: [id])
+
+    FavoritadoPor Favorito[]
+    EmCarrinhos ItemCarrinho[]
+    EmPedidos ItemPedido[]
+}
+
+model Favorito{
+    id String @id @default(uuid())
+    UsuarioId String
+    ProdutoId String
+    Usuario Usuario @relation(fields: [UsuarioId], references: [id])
+    Produto Produto @relation(fields: [ProdutoId], references: [id])
+}
+
+model ItemCarrinho {
+    id String @id @default(uuid())
+    UsuarioId String
+    ProdutoId String
+    Quantidade Int
+
+    Usuario Usuario @relation(fields: [UsuarioId], references: [id])
+    Produto Produto @relation(fields: [ProdutoId], references: [id])
+}
+
+model ItemPedido {
+    id String @id @default(uuid())
+    PedidoId String
+    ProdutoId String
+    Quantidade Int
+    PrecoUnitario Float
+
+    Pedido Pedido @relation(fields: [PedidoId], references: [id])
+    Produto Produto @relation(fields: [ProdutoId], references: [id])
+}
+
+model Pedido {
+    id String @id @default(uuid())
+    UsuarioId String
+    Usuario Usuario @relation("ClientePedidos", fields: [UsuarioId], references: [id])
+    PagamentoId String @unique
+    Pagamento Pagamento? @relation(fields: [PagamentoId], references: [id])
+    
+    Itens ItemPedido[]
+    Total Float
+}
+
+model Pagamento {
+    id String @id @default(uuid())
+    FormaPagamento String
+    IdTransacao String?
+    ComprovanteUrl String?
+    Pedido Pedido?
+}
