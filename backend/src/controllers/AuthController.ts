@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import prisma from '../prisma';
+import jwt from 'jsonwebtoken';
 
 
 class AuthController {
@@ -59,9 +60,13 @@ class AuthController {
                 return res.status(401).json({ erro: "Senha incorreta." });
             }
 
+            const segredo = process.env.JWT_SECRET as string;
+            const token = jwt.sign({ id: usuario.id }, segredo, { expiresIn: '1d' });
+
             return res.status(200).json({
                 mensagem: "Login realizado com sucesso!",
-                usuario: { id: usuario.id, Nome: usuario.Nome}
+                usuario: { id: usuario.id, Nome: usuario.Nome},
+                token: token,
             });
 
         } catch (error) {
