@@ -1,11 +1,12 @@
 import 'dotenv/config';
-import express, { Request, Response } from 'express';
-import { rotas } from './routes';
+import express from 'express';
+import type { Request, Response } from 'express';
+import { Rotas } from './routes';
 
 
 const app = express();
 app.use(express.json());
-app.use(rotas);
+app.use(Rotas);
 
 // Rota de teste
 app.get('/', (req: Request, res: Response) => {
